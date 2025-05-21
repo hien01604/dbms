@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "mssql": "^11.0.1",
+    "node-fetch": "^3.3.2",
+    "sentiment": "^5.0.2"
+  }
+}

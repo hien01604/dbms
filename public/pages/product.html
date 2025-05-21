@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Product Management</title>
+  <script src="https://cdn.tailwindcss.com"></script> <!-- Tailwind CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-100" >
+
+  <!-- Sidebar -->
+<nav class="fixed inset-0 w-64 bg-violet-200 text-grey p-6">
+  <ul class="space-y-6">
+    <li>
+      <a href="/dashboard" class="flex items-center text-lg hover:bg-violet-400 px-4 py-2 rounded">
+        <i class="fas fa-tachometer-alt mr-3"></i>
+        Dashboard
+      </a>
+    </li>
+    <li>
+      <a href="/product" class="flex items-center text-lg hover:bg-violet-400 px-4 py-2 rounded">
+        <i class="fas fa-box-open mr-3"></i>
+        Product
+      </a>
+    </li>
+  </ul>
+</nav>
+
+
+  <!-- Nội dung chính -->
+  <div class="ml-64 p-8">
+    <header class="text-left mb-8">
+      <h1 class="text-3xl font-semibold text-gray-800">Product Management</h1>
+    </header>
+    <div class="flex justify-end items-center mb-6">
+      <!-- Search Bar -->
+      <div class="relative mr-4">
+        <input type="text" placeholder="Search..." class="bg-gray-200 text-gray-600 rounded-full px-4 py-2 w-72 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+      </div>
+      <!-- Sort By -->
+      <div class="flex items-center bg-gray-200 rounded-full px-4 py-2 mr-2">
+        <span class="text-gray-600 mr-2">Sorted by:</span>
+        <select class="bg-transparent text-gray-600 cursor-pointer outline-none appearance-none pr-6 pl-2 py-1 rounded-md border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+          <option>status</option>
+          <option>price</option>
+          <option>rating</option>
+        </select>
+        <i class="fas fa-chevron-down ml-2 text-gray-600"></i>
+      </div>
+      <!-- Add Product Button -->
+      <button class="bg-green-500 text-white px-4 py-2 rounded-full flex items-center hover:bg-green-600">
+        <i class="fas fa-plus mr-2"></i> Add Product
+      </button>
+    </div>
+
+    <!-- Products Table -->
+    <section class="bg-white p-6 rounded-lg shadow-lg">
+      <table class="min-w-full table-auto">
+        <thead>
+          <tr>
+            <th class="border-b p-4 text-left">Product ID</th>
+            <th class="border-b p-4 text-left">Title</th>
+            <th class="border-b p-4 text-left">Price</th>
+            <th class="border-b p-4 text-left">Rating</th>
+            <th class="border-b p-4 text-left">Status</th>
+            <th class="border-b p-4 text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Dữ liệu sản phẩm sẽ được thêm vào đây bằng JS -->
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      console.log('Fetching products from API...');
+
+      fetch("http://localhost:3000/products")
+        .then(response => response.json())
+        .then(data => {
+          console.log('Response received:', data);
+
+          let productTableBody = document.querySelector("tbody");
+          productTableBody.innerHTML = '';
+
+          data.forEach(product => {
+            console.log(product.ProductID, product.Status);
+  let row = document.createElement("tr");
+
+  // Xác định class màu nền cho cả row theo trạng thái
+  let rowBgClass = product.Status === 'Positive' ? 'bg-green-100'
+                 : product.Status === 'Negative' ? 'bg-red-100'
+                 : product.Status === 'Neutral' ? 'bg-orange-100'
+                 : '';
+
+  row.className = rowBgClass; // Gán class màu nền cho <tr>
+
+    row.innerHTML = `
+  <td class="border-b p-4">${product.ProductID}</td>
+  <td class="border-b p-4">${product.Title}</td>
+  <td class="border-b p-4">${product.Price} VND</td>
+<td class="border-b p-4">${product.AvgRating !== null && product.AvgRating !== undefined ? product.AvgRating.toFixed(1) : 'N/A'}/5</td>
+  <td class="border-b p-4">
+    <span class="px-3 py-1 rounded ${
+  product.Status === 'Positive' ? 'bg-green-500 text-white' :
+  product.Status === 'Negative' ? 'bg-red-500 text-white' :
+  product.Status === 'Neutral' ? 'bg-orange-300 text-white' : 'bg-gray-400 text-white'
+}">
+  ${product.Status ?? 'Unknown'}
+</span>
+
+  </td>
+  <td class="border-b p-4 flex justify-center space-x-2">
+    <button title="View Feedback" class="bg-white border border-blue-600 text-blue-600 px-4 py-2 rounded hover:bg-blue-700 rounded-full w-10 h-10 flex justify-center items-center">
+      <i class="fas fa-eye"></i>
+    </button>
+    <button title="Edit" class="border border-yellow-500 text-yellow-500 bg-white hover:bg-yellow-100 rounded-full w-10 h-10 flex items-center justify-center">
+      <i class="fas fa-edit"></i>
+    </button>
+    <button title="Delete" class="border border-red-500 text-red-500 bg-white hover:bg-red-100 rounded-full w-10 h-10 flex items-center justify-center">
+      <i class="fas fa-trash-alt"></i>
+    </button>
+  </td>
+`;
+
+  productTableBody.appendChild(row);
+});
+
+        })
+        .catch(error => console.error("Error fetching data:", error));
+    });
+  </script>
+<!-- Modal popup Product Detail -->
+<div id="productModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50">
+  <div class="bg-white rounded-lg max-w-3xl w-full p-6 relative">
+    <h2 class="text-center font-semibold text-xl mb-4 bg-teal-400 text-white py-2 rounded">Product Detail</h2>
+
+    <!-- Product Title riêng dòng -->
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-700">Product Title</label>
+      <input type="text" id="modalTitle" readonly class="mt-1 p-2 border rounded w-full bg-gray-100" />
+    </div>
+
+    <!-- Grid 2 cột: Price, AvgRating, Status, ProductID -->
+    <div class="grid grid-cols-2 gap-6">
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Price</label>
+        <input type="text" id="modalPrice" readonly class="mt-1 p-2 border rounded w-full bg-gray-100" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Product ID</label>
+        <input type="text" id="modalProductID" readonly class="mt-1 p-2 border rounded w-full bg-gray-100" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Average Rating</label>
+        <input type="text" id="modalAvgRating" readonly class="mt-1 p-2 border rounded w-full bg-gray-100" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Status</label>
+        <input type="text" id="modalStatus" readonly class="mt-1 p-2 border rounded w-full bg-gray-100" />
+      </div>
+    </div>
+
+    <!-- Feedback List -->
+    <div class="mt-6">
+      <label class="block text-sm font-medium text-gray-700 mb-2">Customer Feedback</label>
+      <div id="modalFeedback" class="space-y-3 max-h-60 overflow-y-auto border p-3 rounded bg-gray-50">
+        <!-- Feedback items sẽ được đổ vào đây -->
+      </div>
+    </div>
+
+    <div class="text-right mt-6">
+      <button id="closeModalBtn" class="px-6 py-2 bg-teal-400 text-white rounded hover:bg-teal-500">Close</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  let productsData = [];
+
+  document.addEventListener("DOMContentLoaded", function () {
+    fetch("http://localhost:3000/products")
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return response.json();
+      })
+      .then(data => {
+        productsData = data;
+        renderProductTable(data);
+      })
+      .catch(error => console.error("Error fetching data:", error));
+  });
+
+  function renderProductTable(data) {
+    const productTableBody = document.querySelector("tbody");
+    productTableBody.innerHTML = '';
+
+    data.forEach(product => {
+      const row = document.createElement("tr");
+
+      let rowBgClass = product.Status === 'Positive' ? 'bg-green-100'
+                     : product.Status === 'Negative' ? 'bg-red-100'
+                     : product.Status === 'Neutral' ? 'bg-orange-100'
+                     : '';
+
+      row.className = rowBgClass;
+
+      row.innerHTML = `
+        <td class="border-b p-4">${product.ProductID}</td>
+        <td class="border-b p-4">${product.Title}</td>
+        <td class="border-b p-4">${product.Price} VND</td>
+        <td class="border-b p-4">${product.AvgRating ? product.AvgRating.toFixed(2) : 'N/A'}/5</td>
+        <td class="border-b p-4">
+          <span class="px-3 py-1 rounded ${
+  product.Status === 'Positive' ? 'bg-green-500 text-white' :
+  product.Status === 'Negative' ? 'bg-red-500 text-white' :
+  product.Status === 'Neutral' ? 'bg-orange-500 text-white' :
+  'bg-gray-400 text-white' // Màu xám cho null hoặc không xác định
+}">
+  ${product.Status ?? 'Unknown'}
+</span>
+
+        <td class="border-b p-4 flex justify-center space-x-2">
+          <button title="View Feedback" class="bg-white border border-blue-600 text-blue-600 px-4 py-2 rounded hover:bg-blue-700 rounded-full w-10 h-10 flex justify-center items-center">
+            <i class="fas fa-eye"></i>
+          </button>
+          <button title="Edit" class="border border-yellow-500 text-yellow-500 bg-white hover:bg-yellow-100 rounded-full w-10 h-10 flex items-center justify-center">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button title="Delete" class="border border-red-500 text-red-500 bg-white hover:bg-red-100 rounded-full w-10 h-10 flex items-center justify-center">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </td>
+      `;
+
+      productTableBody.appendChild(row);
+    });
+  }
+
+  const modal = document.getElementById("productModal");
+const closeModalBtn = document.getElementById("closeModalBtn");
+
+const modalProductID = document.getElementById("modalProductID");
+const modalPrice = document.getElementById("modalPrice");
+const modalTitle = document.getElementById("modalTitle");
+const modalAvgRating = document.getElementById("modalAvgRating");
+const modalStatus = document.getElementById("modalStatus");
+const modalFeedback = document.getElementById("modalFeedback");
+
+function openModal(product) {
+  console.log('Opening modal for product:', product.ProductID, 'Status:', product.Status);
+  modalProductID.value = product.ProductID;
+  modalPrice.value = product.Price + ' VND';
+  modalTitle.value = product.Title;
+  modalAvgRating.value = product.AvgRating ? product.AvgRating + '/5' : 'N/A';
+  modalStatus.value = product.Status || 'N/A';
+
+  // Load Feedback list
+  modalFeedback.innerHTML = '';
+  if (product.Feedback && product.Feedback.length > 0) {
+    product.Feedback.forEach(fb => {
+      let colorClass = fb.Sentiment === 'Positive' ? 'border-green-500 bg-green-100'
+                      : fb.Sentiment === 'Negative' ? 'border-red-500 bg-red-100'
+                      : 'border-yellow-400 bg-yellow-100';
+      let fbDiv = document.createElement("div");
+      fbDiv.className = `border-l-4 p-2 rounded ${colorClass}`;
+      fbDiv.innerHTML = `<strong>${fb.CustomerName}</strong>: ${fb.FeedbackText} <span class="ml-2 text-sm text-gray-500">(${fb.CRating}/5)</span>`;
+      modalFeedback.appendChild(fbDiv);
+    });
+  } else {
+    modalFeedback.innerHTML = `<div class="text-gray-400 italic">No feedback available</div>`;
+  }
+
+  modal.classList.remove("hidden");
+}
+
+closeModalBtn.addEventListener("click", () => modal.classList.add("hidden"));
+modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.add("hidden"); });
+
+// Gắn event cho nút View Feedback
+document.addEventListener("click", function(e) {
+  if (e.target.closest('button[title="View Feedback"]')) {
+    const btn = e.target.closest('button[title="View Feedback"]');
+    const tr = btn.closest("tr");
+    const productId = parseInt(tr.querySelector("td").textContent.trim());
+
+    // Tìm product từ dữ liệu đang hiển thị
+    const product = productsData.find(p => p.ProductID === productId);
+    if (product) openModal(product);
+  }
+});
+
+</script>
+
+
+</body>
+</html>
